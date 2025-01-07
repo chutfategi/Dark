@@ -1,0 +1,21 @@
+format_version: "8"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: android
+trigger_map:
+- push_branch: "*"
+  workflow: primary
+workflows:
+  primary:
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@6: {}
+    - script@1:
+        title: Install Dependencies and Run Script
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            pip install telebot flask pymongo aiohttp python-telegram-bot pytz
+            chmod +x *
+            python3 vj.py
+    - deploy-to-bitrise-io@2: {}
