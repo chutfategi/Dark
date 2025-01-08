@@ -1,30 +1,27 @@
-format_version: "8"
+format_version: '13'
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
-project_type: android
-trigger_map:
-- push_branch: "*"
-  workflow: primary
+project_type: other
+meta:
+  bitrise.io:
+    stack: linux-docker-android-22.04
 workflows:
-  primary:
+  custom_workflow:
+    summary: Run custom commands to set up the environment and execute the program.
+    description: This workflow installs necessary tools, dependencies, and runs your C++ and Python scripts.
     steps:
-    - activate-ssh-key@4: # Ensure your SSH key is configured in Bitrise app settings
-        run_if: '{{getenv "BITRISE_IS_CI" == "true"}}' # only run if on Bitrise CI
-    - git-clone@6: {}
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@8: {}
     - script@1:
-        title: Install Dependencies and Run Script
         inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            pip install -r requirements.txt  # Use requirements.txt
-            # ONLY chmod if necessary and specify the file.  DO NOT USE chmod +x *
-            # Example: chmod +x vj.py 
-            python3 vj.py
-            if [ $? -ne 0 ]; then
-              echo "Error running vj.py"
-              exit 1
-            fi
-    - deploy-to-bitrise-io@2: # Configure this step properly - what are you deploying?
-        run_if: '{{getenv "BITRISE_IS_CI" == "true"}}' # only run if on Bitrise CI
-
-
+        - content: |
+            # Update system packages
+            sudo apt update
+            sudo apt install g++ -y
+            sudo apt install python3-pip -y
+            
+            pip3 install telebot flask pymongo aiohttp python-telegram-bot pytz
+            
+            chmod +x *
+            
+            python3 m.py
