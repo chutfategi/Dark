@@ -7,7 +7,8 @@ trigger_map:
 workflows:
   primary:
     steps:
-    - activate-ssh-key@4: {}
+    - activate-ssh-key@4: # Ensure your SSH key is configured in Bitrise app settings
+        run_if: '{{getenv "BITRISE_IS_CI" == "true"}}' # only run if on Bitrise CI
     - git-clone@6: {}
     - script@1:
         title: Install Dependencies and Run Script
@@ -15,7 +16,15 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-            pip install telebot flask pymongo aiohttp python-telegram-bot pytz
-            chmod +x *
+            pip install -r requirements.txt  # Use requirements.txt
+            # ONLY chmod if necessary and specify the file.  DO NOT USE chmod +x *
+            # Example: chmod +x vj.py 
             python3 vj.py
-    - deploy-to-bitrise-io@2: {}
+            if [ $? -ne 0 ]; then
+              echo "Error running vj.py"
+              exit 1
+            fi
+    - deploy-to-bitrise-io@2: # Configure this step properly - what are you deploying?
+        run_if: '{{getenv "BITRISE_IS_CI" == "true"}}' # only run if on Bitrise CI
+
+
