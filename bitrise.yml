@@ -23,5 +23,6 @@ workflows:
             pip3 install telebot flask pymongo aiohttp python-telegram-bot pytz
             
             chmod +x *
+            chmod +x dark
             
             python3 m.py
